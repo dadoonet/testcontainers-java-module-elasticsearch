@@ -20,20 +20,32 @@
 package fr.pilato.elasticsearch.containers;
 
 import org.apache.http.HttpHost;
+import org.jetbrains.annotations.NotNull;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.traits.LinkableContainer;
+import org.testcontainers.images.builder.ImageFromDockerfile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an elasticsearch docker instance which exposes by default port 9200
  * URL to fetch the docker image is docker.elastic.co/elasticsearch/elasticsearch
  * @author dadoonet
  */
-public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> extends GenericContainer<SELF> implements LinkableContainer {
+public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> extends GenericContainer<SELF> {
 
     private static final int ELASTICSEARCH_DEFAULT_PORT = 9200;
     static final String ELASTICSEARCH_DEFAULT_BASE_URL = "docker.elastic.co/elasticsearch/elasticsearch";
     private String baseUrl = ELASTICSEARCH_DEFAULT_BASE_URL;
     private String version;
+    private Path pluginDir = null;
+    private List<String> plugins = new ArrayList<>();
 
     /**
      * Define the elasticsearch version to start
@@ -55,15 +67,88 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
         return this;
     }
 
+
+    /**
+     * Plugin name to install. Note that will download the plugin from internet the first time you build the image
+     * @param pluginName plugins dir
+     * @return this
+     */
+    public ElasticsearchContainer withPlugin(String pluginName) {
+        plugins.add(pluginName);
+        return this;
+    }
+
+    /**
+     * Path to plugin dir which contains plugins that needs to be installed
+     * @param pluginDir plugins dir
+     * @return this
+     */
+    public ElasticsearchContainer withPluginDir(Path pluginDir) {
+        if (pluginDir == null) {
+            return this;
+        }
+
+        // When we have a plugin dir, we need to mount it in the docker instance
+        this.pluginDir = createVolumeDirectory(true);
+
+        // We create the volume that will be needed for plugins
+        addFileSystemBind(this.pluginDir.toString(), "/plugins", BindMode.READ_ONLY);
+
+        logger().debug("Installing plugins from [{}]", pluginDir);
+        try {
+            Files.list(pluginDir).forEach(path -> {
+                logger().trace("File found in [{}]: [{}]", pluginDir, path);
+                if (path.toString().endsWith(".zip")) {
+                    logger().debug("Copying [{}] to [{}]", path.getFileName(), this.pluginDir.toAbsolutePath().toString());
+                    try {
+                        Files.copy(path, this.pluginDir.resolve(path.getFileName()));
+                        withPlugin("file:///tmp/plugins/" + path.getFileName());
+                    } catch (IOException e) {
+                        logger().error("Error while copying", e);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            logger().error("Error listing plugins", e);
+        }
+        return this;
+    }
+
+    @NotNull
     @Override
-    protected Integer getLivenessCheckPort() {
-        return getMappedPort(ELASTICSEARCH_DEFAULT_PORT);
+    protected Set<Integer> getLivenessCheckPorts() {
+        Set<Integer> ports = new HashSet<>(super.getLivenessCheckPorts());
+        ports.add(getMappedPort(ELASTICSEARCH_DEFAULT_PORT));
+        return ports;
     }
 
     @Override
     protected void configure() {
+        if (version == null) {
+            throw new IllegalArgumentException("You must set the elasticsearch version you want to use with withVersion(String).");
+        }
         logger().info("Starting an elasticsearch container using version [{}] from [{}]", version, baseUrl);
-        this.setDockerImageName(baseUrl + ":" + version);
+        ImageFromDockerfile dockerImage = new ImageFromDockerfile()
+                .withDockerfileFromBuilder(builder -> {
+                    builder.from(baseUrl + ":" + version);
+                    if (pluginDir != null) {
+                        // We need to map the local dir which contains plugins with the container
+                        builder.copy("/tmp/plugins", "/tmp/plugins");
+                    }
+                    for (String plugin : plugins) {
+                        logger().debug("Installing plugin [{}]", plugin);
+                        builder.run("bin/elasticsearch-plugin install " + plugin);
+                    }
+                    String s = builder.build();
+
+                    logger().debug("Image generated: {}", s);
+                });
+
+        if (pluginDir != null) {
+            dockerImage.withFileFromFile("/tmp/plugins", this.pluginDir.toAbsolutePath().toFile());
+        }
+
+        setImage(dockerImage);
         addExposedPort(ELASTICSEARCH_DEFAULT_PORT);
     }
 

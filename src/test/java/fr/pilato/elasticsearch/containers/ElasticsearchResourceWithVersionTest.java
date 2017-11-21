@@ -20,11 +20,11 @@
 package fr.pilato.elasticsearch.containers;
 
 
-import org.junit.Rule;
+import org.junit.ClassRule;
 
 public class ElasticsearchResourceWithVersionTest extends ElasticsearchResourceBaseTest {
-    @Rule
-    public ElasticsearchResource elasticsearch = new ElasticsearchResource("elasticsearch-version.properties");
+    @ClassRule
+    public static ElasticsearchResource elasticsearch = new ElasticsearchResource("elasticsearch-version.properties");
 
     @Override
     ElasticsearchResource getElasticsearchResource() {

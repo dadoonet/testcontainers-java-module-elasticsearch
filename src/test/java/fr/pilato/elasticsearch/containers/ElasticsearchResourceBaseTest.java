@@ -26,7 +26,8 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.junit.Rule;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -38,16 +39,31 @@ public abstract class ElasticsearchResourceBaseTest {
 
     abstract ElasticsearchResource getElasticsearchResource();
 
+    RestClient restClient = null;
+
+    @Before
+    public void createRestClient() {
+        if (restClient == null) {
+            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials("elastic", getElasticsearchResource().getPassword()));
+
+            restClient = RestClient.builder(getElasticsearchResource().getHost())
+                    .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+                    .build();
+        }
+    }
+
+    @After
+    public void stopRestClient() throws IOException {
+        if (restClient != null) {
+            restClient.close();
+        }
+    }
+
     @Test
     public void elasticsearchTest() throws IOException {
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials("elastic", "changeme"));
-
-        RestClient client = RestClient.builder(getElasticsearchResource().getHost())
-                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
-                .build();
-        Response response = client.performRequest("GET", "/");
+        Response response = restClient.performRequest("GET", "/");
         assertThat(response.getStatusLine().getStatusCode(), is(200));
     }
 }
