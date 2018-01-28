@@ -20,25 +20,14 @@
 package fr.pilato.elasticsearch.containers;
 
 
-import org.junit.Rule;
-
-import java.io.IOException;
-
-import static org.junit.Assume.assumeTrue;
+import org.junit.ClassRule;
 
 public class ElasticsearchResourceDefaultsTest extends ElasticsearchResourceBaseTest {
-    @Rule
-    public ElasticsearchResource elasticsearch = new ElasticsearchResource();
+    @ClassRule
+    public static ElasticsearchResource elasticsearch = new ElasticsearchResource();
 
     @Override
     ElasticsearchResource getElasticsearchResource() {
         return elasticsearch;
-    }
-
-    @Override
-    public void elasticsearchTest() throws IOException {
-        // Let's just ignore this test because with elasticsearch 6.0.0-rc1, we don't have a default
-        // User/Password anymore
-        assumeTrue("We skip the test with elasticsearch 6.0.0-rc1 for now", false);
     }
 }

@@ -20,50 +20,134 @@
 package fr.pilato.elasticsearch.containers;
 
 
+import com.github.dockerjava.api.exception.DockerClientException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
 import org.junit.Test;
+import org.testcontainers.containers.ContainerFetchException;
 
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Properties;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class ElasticsearchContainerTest {
 
-    private static ElasticsearchContainer container;
+    private ElasticsearchContainer container = null;
+    private RestClient client = null;
 
-    @BeforeClass
-    public static void startContainer() {
-        container = new ElasticsearchContainer()
-                .withVersion("5.6.3");
-
-        container.configure();
-        container.start();
+    @After
+    public void stopRestClient() throws IOException {
+        if (client != null) {
+            client.close();
+        }
     }
 
-    @AfterClass
-    public static void stopContainer() {
-        container.stop();
+    @After
+    public void stopContainer() {
+        if (container != null) {
+            container.stop();
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void elasticsearchNoVersionTest() {
+        container = new ElasticsearchContainer();
+        container.configure();
     }
 
     @Test
-    public void elasticsearchTest() throws IOException {
-
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials("elastic", "changeme"));
-
-        RestClient client = RestClient.builder(container.getHost())
-                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
-                .build();
-        Response response = client.performRequest("GET", "/");
+    public void elasticsearchDefaultTest() throws IOException {
+        container = new ElasticsearchContainer();
+        container.withVersion("6.1.2");
+        container.withEnv("ELASTIC_PASSWORD", "changeme");
+        container.configure();
+        container.start();
+        Response response = getClient(container).performRequest("GET", "/");
         assertThat(response.getStatusLine().getStatusCode(), is(200));
+    }
+
+    @Test
+    public void elasticsearchFullTest() throws IOException {
+        container = new ElasticsearchContainer();
+        container.withVersion("6.1.2");
+        container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
+
+        // We need to read where we exactly put the files
+        Properties props = new Properties();
+        try {
+            props.load(ElasticsearchResource.class.getResourceAsStream("elasticsearch-plugins-dir.properties"));
+            String pluginDir = props.getProperty("pluginDir");
+            container.withPluginDir(Paths.get(pluginDir));
+        } catch (IOException ignored) {
+            // This can normally never happen unless someone modifies the test resources dir o_O
+        }
+
+        container.withEnv("ELASTIC_PASSWORD", "changeme");
+
+        container.configure();
+        container.start();
+
+        Response response = getClient(container).performRequest("GET", "/");
+        assertThat(response.getStatusLine().getStatusCode(), is(200));
+
+        response = getClient(container).performRequest("GET", "/_cat/plugins");
+        assertThat(response.getStatusLine().getStatusCode(), is(200));
+        String responseAsString = EntityUtils.toString(response.getEntity());
+        assertThat(responseAsString, containsString("ingest-attachment"));
+    }
+
+    @Test
+    public void elasticsearchWithPlugin() throws IOException {
+        // This test might fail if no internet connection is available
+        // As elasticsearch-plugin would download files from internet
+        // In which case, we should just ignore the test
+
+        container = new ElasticsearchContainer();
+        container.withVersion("6.1.2");
+        container.withPlugin("discovery-gce");
+        container.withEnv("ELASTIC_PASSWORD", "changeme");
+
+        container.configure();
+
+        try {
+            container.start();
+            Response response = getClient(container).performRequest("GET", "/");
+            assertThat(response.getStatusLine().getStatusCode(), is(200));
+
+            response = getClient(container).performRequest("GET", "/_cat/plugins");
+            assertThat(response.getStatusLine().getStatusCode(), is(200));
+            String responseAsString = EntityUtils.toString(response.getEntity());
+            assertThat(responseAsString, containsString("discovery-gce"));
+        } catch (ContainerFetchException exception) {
+            assertThat(exception.getCause(), instanceOf(DockerClientException.class));
+            assertThat(exception.getCause().getMessage(), containsString("The command '/bin/sh -c bin/elasticsearch-plugin install discovery-gce' returned a non-zero code: 1"));
+            assumeTrue("We can't test this if internet is not available because we can't download elasticsearch plugins.", false);
+        }
+    }
+
+    private RestClient getClient(ElasticsearchContainer container) {
+        if (client == null) {
+            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials("elastic", "changeme"));
+
+            client = RestClient.builder(container.getHost())
+                    .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+                    .build();
+        }
+
+        return client;
     }
 }

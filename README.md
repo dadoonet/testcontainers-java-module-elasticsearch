@@ -2,7 +2,7 @@
 
 Testcontainers module for [elasticsearch](https://www.elastic.co/products/elasticsearch).
 
-Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html) provided by elastic.
+Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/6.1/docker.html) provided by elastic.
 
 See [testcontainers.org](https://www.testcontainers.org) for more information about Testcontainers.
 
@@ -11,20 +11,31 @@ See [testcontainers.org](https://www.testcontainers.org) for more information ab
 You can start an elasticsearch container instance from any Java application by using:
 
 ```java
-// Specify the version you need
+// Specify the version you need.
 ElasticsearchContainer container = new ElasticsearchContainer()
-        .withVersion("5.6.3");
+        .withVersion("6.1.2");
 
-// You can also set what is the Docker registry you want to use with:
+// Optional: you can also set what is the Docker registry you want to use with.
 container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
 
-// Configure the container (mandatory)
+// Optional: define which plugin you would like to install.
+// It will download it from internet when building the image
+container.withPlugin("discovery-gce");
+
+// Optional: define the plugins directory which should contain plugins ZIP files you want to install.
+// Note that if you want to just download an official plugin, use withPlugin(String) instead.
+container.withPluginDir(Paths.get("/path/to/zipped-plugins-dir"));
+
+// Optional: you can also change the password for X-Pack (for versions >= 6.1).
+container.withEnv("ELASTIC_PASSWORD", "changeme");
+
+// Configure the container (mandatory).
 container.configure();
 
-// Start the container
+// Start the container.
 container.start();
 
-// Do whatever you want here
+// Do whatever you want here.
 final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", "changeme"));
 RestClient client = RestClient.builder(container.getHost())
@@ -32,11 +43,11 @@ RestClient client = RestClient.builder(container.getHost())
         .build();
 Response response = client.performRequest("GET", "/");
 
-// Stop the container
+// Stop the container.
 container.stop();
 ```
 
-## JUnit Usage example
+## JUnit 4 Usage example
 
 Running elasticsearch as a resource during a test:
 
@@ -64,7 +75,7 @@ the settings will be read from it:
 
 ```properties
 baseUrl=docker.elastic.co/elasticsearch/elasticsearch
-version=6.0.0-rc1
+version=6.1.2
 ```
 
 You can also define this programmatically with:
@@ -73,7 +84,9 @@ You can also define this programmatically with:
 @Rule
 public ElasticsearchResource elasticsearch = new ElasticsearchResource(
     "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
-    "6.0.0-rc1");                                    // version
+    "6.1.2",                                         // version
+    Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
+    "changeme");                                     // X-Pack security password to set (can be null)
 ```
 
 ## Dependency information
@@ -101,5 +114,5 @@ See [LICENSE](LICENSE).
 
 ## Copyright
 
-Copyright (c) 2017 David Pilato.
+Copyright (c) 2017, 2018 David Pilato.
 

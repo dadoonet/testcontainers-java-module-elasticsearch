@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-parent</artifactId>
-        <version>1.4.3</version>
+        <version>1.5.1</version>
     </parent>
 
     <groupId>fr.pilato.elasticsearch.testcontainers</groupId>
@@ -25,8 +25,15 @@
     </licenses>
 
     <properties>
-        <elasticsearch.client.version>6.0.0-rc1</elasticsearch.client.version>
+        <!-- WARN: anytime you change the version, change profiles copy-plugin and fake-elastic-maven-repository -->
+        <elasticsearch.version>6.1.2</elasticsearch.version>
+        <!-- WARN: anytime you change the version, change profiles copy-old-plugin and fake-elastic-maven-repository-for-old-plugin -->
+        <elasticsearch.version.old>5.6.3</elasticsearch.version.old>
+        <elasticsearch.client.version>${elasticsearch.version}</elasticsearch.client.version>
         <integ.http.port>9400</integ.http.port>
+        <plugin.dir>${project.build.directory}/plugins</plugin.dir>
+        <xpack.password>changeme</xpack.password>
+        <skipTests>false</skipTests>
     </properties>
 
     <dependencies>
@@ -40,6 +47,14 @@
             <artifactId>elasticsearch-rest-client</artifactId>
             <version>${elasticsearch.client.version}</version>
         </dependency>
+        <dependency>
+            <!-- TODO remove when https://github.com/testcontainers/testcontainers-java/pull/559 is merged -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <!-- Needed when using Java9 -->
+            <version>1.16.20</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -49,7 +64,22 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -70,7 +100,221 @@
         <url>https://github.com/dadoonet/testcontainers-java-module-elasticsearch</url>
     </scm>
 
+    <repositories>
+        <!-- This repository is used to test with x-pack -->
+        <repository>
+            <id>elastic-download-service</id>
+            <name>Elastic Download Service</name>
+            <url>https://artifacts.elastic.co/maven/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+
+        <repository>
+            <id>oss-snapshots</id>
+            <name>Sonatype OSS Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
     <profiles>
+        <profile>
+            <id>fake-elastic-maven-repository</id>
+            <activation>
+                <file>
+                    <!-- WARN: change this if you change the the elasticsearch.version -->
+                    <missing>${user.home}/.m2/repository/org/elasticsearch/plugin/ingest-attachment/6.1.2/ingest-attachment-6.1.2.zip</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Annoying we need to fake elastic maven repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>wagon-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>download-ingest-attachment</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>download-single</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://artifacts.elastic.co</url>
+                                    <fromFile>downloads/elasticsearch-plugins/ingest-attachment/ingest-attachment-${elasticsearch.version}.zip</fromFile>
+                                    <toDir>${plugin.dir}/${elasticsearch.version}</toDir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <version>2.5.2</version>
+                        <executions>
+                            <execution>
+                                <id>fake-elasticsearch-repository</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>install-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${plugin.dir}/${elasticsearch.version}/ingest-attachment-${elasticsearch.version}.zip</file>
+                                    <groupId>org.elasticsearch.plugin</groupId>
+                                    <artifactId>ingest-attachment</artifactId>
+                                    <version>${elasticsearch.version}</version>
+                                    <packaging>zip</packaging>
+                                    <generatePom>true</generatePom>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>fake-elastic-maven-repository-for-old-plugin</id>
+            <activation>
+                <file>
+                    <!-- WARN: change this if you change the the elasticsearch.version.old -->
+                    <missing>${user.home}/.m2/repository/org/elasticsearch/plugin/ingest-attachment/5.6.3/ingest-attachment-5.6.3.zip</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Annoying we need to fake elastic maven repository -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>wagon-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>download-ingest-attachment-old</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>download-single</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://artifacts.elastic.co</url>
+                                    <fromFile>downloads/elasticsearch-plugins/ingest-attachment/ingest-attachment-${elasticsearch.version.old}.zip</fromFile>
+                                    <toDir>${plugin.dir}/${elasticsearch.version.old}</toDir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <version>2.5.2</version>
+                        <executions>
+                            <execution>
+                                <id>fake-elasticsearch-repository-old</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>install-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${plugin.dir}/${elasticsearch.version.old}/ingest-attachment-${elasticsearch.version.old}.zip</file>
+                                    <groupId>org.elasticsearch.plugin</groupId>
+                                    <artifactId>ingest-attachment</artifactId>
+                                    <version>${elasticsearch.version.old}</version>
+                                    <packaging>zip</packaging>
+                                    <generatePom>true</generatePom>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>copy-plugin</id>
+            <activation>
+                <file>
+                    <!-- WARN: change this if you change the the elasticsearch.version -->
+                    <missing>target/plugins/6.1.2/ingest-attachment-6.1.2.zip</missing>
+                </file>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Copy some plugins for integration testing -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.10</version>
+                        <executions>
+                            <execution>
+                                <id>integ-setup-dependencies-plugins</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.elasticsearch.plugin</groupId>
+                                            <artifactId>ingest-attachment</artifactId>
+                                            <version>${elasticsearch.version}</version>
+                                            <type>zip</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <useBaseVersion>true</useBaseVersion>
+                                    <outputDirectory>${plugin.dir}/${elasticsearch.version}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>copy-old-plugin</id>
+            <activation>
+                <file>
+                    <!-- WARN: change this if you change the the elasticsearch.version.old -->
+                    <missing>target/plugins/5.6.3/ingest-attachment-5.6.3.zip</missing>
+                </file>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Copy some plugins for integration testing -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.10</version>
+                        <executions>
+                            <execution>
+                                <id>integ-setup-dependencies-plugins-old</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.elasticsearch.plugin</groupId>
+                                            <artifactId>ingest-attachment</artifactId>
+                                            <version>${elasticsearch.version.old}</version>
+                                            <type>zip</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <useBaseVersion>true</useBaseVersion>
+                                    <outputDirectory>${plugin.dir}/${elasticsearch.version.old}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>release</id>
             <build>
