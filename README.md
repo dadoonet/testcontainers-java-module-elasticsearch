@@ -1,6 +1,7 @@
 # TestContainers elasticsearch testing module
 
 [![Build Status](https://travis-ci.org/dadoonet/testcontainers-java-module-elasticsearch.svg?branch=master)](https://travis-ci.org/dadoonet/testcontainers-java-module-elasticsearch)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/fr.pilato.elasticsearch.testcontainers/testcontainers-elasticsearch/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/fr.pilato.elasticsearch.testcontainers/testcontainers-elasticsearch/)
 
 Testcontainers module for [elasticsearch](https://www.elastic.co/products/elasticsearch).
 
