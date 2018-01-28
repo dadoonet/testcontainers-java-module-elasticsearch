@@ -28,7 +28,7 @@
         <!-- WARN: anytime you change the version, change profiles copy-plugin and fake-elastic-maven-repository -->
         <elasticsearch.version>6.1.2</elasticsearch.version>
         <!-- WARN: anytime you change the version, change profiles copy-old-plugin and fake-elastic-maven-repository-for-old-plugin -->
-        <elasticsearch.version.old>5.6.3</elasticsearch.version.old>
+        <elasticsearch.version.old>5.6.6</elasticsearch.version.old>
         <elasticsearch.client.version>${elasticsearch.version}</elasticsearch.client.version>
         <integ.http.port>9400</integ.http.port>
         <plugin.dir>${project.build.directory}/plugins</plugin.dir>
@@ -191,7 +191,7 @@
             <activation>
                 <file>
                     <!-- WARN: change this if you change the the elasticsearch.version.old -->
-                    <missing>${user.home}/.m2/repository/org/elasticsearch/plugin/ingest-attachment/5.6.3/ingest-attachment-5.6.3.zip</missing>
+                    <missing>${user.home}/.m2/repository/org/elasticsearch/plugin/ingest-attachment/5.6.6/ingest-attachment-5.6.6.zip</missing>
                 </file>
             </activation>
             <build>
@@ -289,7 +289,7 @@
             <activation>
                 <file>
                     <!-- WARN: change this if you change the the elasticsearch.version.old -->
-                    <missing>target/plugins/5.6.3/ingest-attachment-5.6.3.zip</missing>
+                    <missing>target/plugins/5.6.6/ingest-attachment-5.6.6.zip</missing>
                 </file>
                 <activeByDefault>false</activeByDefault>
             </activation>
