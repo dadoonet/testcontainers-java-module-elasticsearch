@@ -1,5 +1,7 @@
 # TestContainers elasticsearch testing module
 
+[![Build Status](https://travis-ci.org/dadoonet/testcontainers-java-module-elasticsearch.svg?branch=master)](https://travis-ci.org/dadoonet/testcontainers-java-module-elasticsearch)
+
 Testcontainers module for [elasticsearch](https://www.elastic.co/products/elasticsearch).
 
 Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/6.1/docker.html) provided by elastic.
