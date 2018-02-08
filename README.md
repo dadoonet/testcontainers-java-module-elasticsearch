@@ -18,7 +18,7 @@ You can start an elasticsearch container instance from any Java application by u
 ElasticsearchContainer container = new ElasticsearchContainer();
 
 // Optional but highly recommended: Specify the version you need.
-container.withVersion("6.2.0");
+container.withVersion("6.2.1");
 
 // Optional: you can also set what is the Docker registry you want to use with.
 container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
@@ -80,7 +80,7 @@ the settings will be read from it:
 
 ```properties
 baseUrl=docker.elastic.co/elasticsearch/elasticsearch
-version=6.2.0
+version=6.2.1
 ```
 
 You can also define this programmatically with:
@@ -89,7 +89,7 @@ You can also define this programmatically with:
 @Rule
 public ElasticsearchResource elasticsearch = new ElasticsearchResource(
     "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
-    "6.2.0",                                         // version (can be null)
+    "6.2.1",                                         // version (can be null)
     Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
     "changeme");                                     // X-Pack security password to set (can be null)
 ```

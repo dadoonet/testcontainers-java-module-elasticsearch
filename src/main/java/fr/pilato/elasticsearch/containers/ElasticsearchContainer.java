@@ -63,7 +63,7 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
 
     /**
      * Define the elasticsearch version to start
-     * @param version  Elasticsearch Version like 5.6.6 or 6.2.0
+     * @param version  Elasticsearch Version like 5.6.6 or 6.2.1
      * @return this
      */
     public ElasticsearchContainer withVersion(String version) {

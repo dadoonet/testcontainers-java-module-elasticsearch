@@ -41,7 +41,7 @@ compile group: '${project.groupId}', name: '${project.artifactId}', version: '${
 Then basically just start elasticsearch within Docker from your java code:
 
 ```java
-ElasticsearchContainer container = new ElasticsearchContainer().withVersion("6.2.0");
+ElasticsearchContainer container = new ElasticsearchContainer().withVersion("$announceParameters.elasticsearch");
 container.configure();
 container.start();
 ```
