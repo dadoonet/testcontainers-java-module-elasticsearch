@@ -78,6 +78,55 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <!-- Copy some plugins for integration testing -->
+                        <id>integ-setup-dependencies-plugins</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.elasticsearch.plugin</groupId>
+                                    <artifactId>ingest-attachment</artifactId>
+                                    <version>${elasticsearch.version}</version>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <useBaseVersion>true</useBaseVersion>
+                            <outputDirectory>${plugin.dir}/${elasticsearch.version}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Copy some old plugins for integration testing -->
+                        <id>integ-setup-dependencies-plugins-old</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.elasticsearch.plugin</groupId>
+                                    <artifactId>ingest-attachment</artifactId>
+                                    <version>${elasticsearch.version.old}</version>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <useBaseVersion>true</useBaseVersion>
+                            <outputDirectory>${plugin.dir}/${elasticsearch.version.old}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.8</version>
@@ -265,90 +314,6 @@
             </build>
         </profile>
 
-        <profile>
-            <id>copy-plugin</id>
-            <activation>
-                <file>
-                    <!-- WARN: change this if you change the the elasticsearch.version -->
-                    <missing>target/plugins/6.2.1/ingest-attachment-6.2.1.zip</missing>
-                </file>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- Copy some plugins for integration testing -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.10</version>
-                        <executions>
-                            <execution>
-                                <id>integ-setup-dependencies-plugins</id>
-                                <phase>generate-test-resources</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${skipTests}</skip>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.elasticsearch.plugin</groupId>
-                                            <artifactId>ingest-attachment</artifactId>
-                                            <version>${elasticsearch.version}</version>
-                                            <type>zip</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <useBaseVersion>true</useBaseVersion>
-                                    <outputDirectory>${plugin.dir}/${elasticsearch.version}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>copy-old-plugin</id>
-            <activation>
-                <file>
-                    <!-- WARN: change this if you change the the elasticsearch.version.old -->
-                    <missing>target/plugins/5.6.6/ingest-attachment-5.6.6.zip</missing>
-                </file>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- Copy some plugins for integration testing -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.10</version>
-                        <executions>
-                            <execution>
-                                <id>integ-setup-dependencies-plugins-old</id>
-                                <phase>generate-test-resources</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${skipTests}</skip>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.elasticsearch.plugin</groupId>
-                                            <artifactId>ingest-attachment</artifactId>
-                                            <version>${elasticsearch.version.old}</version>
-                                            <type>zip</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <useBaseVersion>true</useBaseVersion>
-                                    <outputDirectory>${plugin.dir}/${elasticsearch.version.old}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>release</id>
             <build>
