@@ -31,25 +31,39 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
+import static fr.pilato.elasticsearch.containers.ElasticsearchResource.FALLBACK_RESOURCE_NAME;
+
 /**
- * Represents an elasticsearch docker instance which exposes by default port 9200
- * URL to fetch the docker image is docker.elastic.co/elasticsearch/elasticsearch
+ * Represents an elasticsearch docker instance which exposes by default port 9200.
+ * The docker image is by default fetch from docker.elastic.co/elasticsearch/elasticsearch
  * @author dadoonet
  */
 public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> extends GenericContainer<SELF> {
 
     private static final int ELASTICSEARCH_DEFAULT_PORT = 9200;
-    static final String ELASTICSEARCH_DEFAULT_BASE_URL = "docker.elastic.co/elasticsearch/elasticsearch";
+    static final String ELASTICSEARCH_DEFAULT_BASE_URL;
+    static final String ELASTICSEARCH_DEFAULT_VERSION;
+    static {
+        Properties props = new Properties();
+        try {
+            props.load(ElasticsearchResource.class.getResourceAsStream(FALLBACK_RESOURCE_NAME));
+        } catch (IOException ignored) {
+        }
+        ELASTICSEARCH_DEFAULT_BASE_URL = props.getProperty("baseUrl");
+        ELASTICSEARCH_DEFAULT_VERSION = props.getProperty("version");
+    }
+
     private String baseUrl = ELASTICSEARCH_DEFAULT_BASE_URL;
-    private String version;
+    private String version = ELASTICSEARCH_DEFAULT_VERSION;
     private Path pluginDir = null;
     private List<String> plugins = new ArrayList<>();
 
     /**
      * Define the elasticsearch version to start
-     * @param version  Elasticsearch Version like 5.6.3 or 6.0.0-rc1
+     * @param version  Elasticsearch Version like 5.6.6 or 6.2.0
      * @return this
      */
     public ElasticsearchContainer withVersion(String version) {
@@ -124,9 +138,6 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
 
     @Override
     protected void configure() {
-        if (version == null) {
-            throw new IllegalArgumentException("You must set the elasticsearch version you want to use with withVersion(String).");
-        }
         logger().info("Starting an elasticsearch container using version [{}] from [{}]", version, baseUrl);
         ImageFromDockerfile dockerImage = new ImageFromDockerfile()
                 .withDockerfileFromBuilder(builder -> {

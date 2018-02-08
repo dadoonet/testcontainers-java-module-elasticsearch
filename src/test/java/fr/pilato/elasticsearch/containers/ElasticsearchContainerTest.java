@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import static fr.pilato.elasticsearch.containers.ElasticsearchContainer.ELASTICSEARCH_DEFAULT_BASE_URL;
+import static fr.pilato.elasticsearch.containers.ElasticsearchContainer.ELASTICSEARCH_DEFAULT_VERSION;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -61,16 +63,20 @@ public class ElasticsearchContainerTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void elasticsearchNoVersionTest() {
+    @Test
+    public void elasticsearchNoVersionTest() throws IOException {
         container = new ElasticsearchContainer();
         container.configure();
+        container.withEnv("ELASTIC_PASSWORD", "changeme");
+        container.start();
+        Response response = getClient(container).performRequest("GET", "/");
+        assertThat(response.getStatusLine().getStatusCode(), is(200));
     }
 
     @Test
     public void elasticsearchDefaultTest() throws IOException {
         container = new ElasticsearchContainer();
-        container.withVersion(getVersionToTest());
+        container.withVersion(ELASTICSEARCH_DEFAULT_VERSION);
         container.withEnv("ELASTIC_PASSWORD", "changeme");
         container.configure();
         container.start();
@@ -81,8 +87,8 @@ public class ElasticsearchContainerTest {
     @Test
     public void elasticsearchFullTest() throws IOException {
         container = new ElasticsearchContainer();
-        container.withVersion(getVersionToTest());
-        container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
+        container.withVersion(ELASTICSEARCH_DEFAULT_VERSION);
+        container.withBaseUrl(ELASTICSEARCH_DEFAULT_BASE_URL);
 
         // We need to read where we exactly put the files
         Properties props = new Properties();
@@ -115,7 +121,7 @@ public class ElasticsearchContainerTest {
         // In which case, we should just ignore the test
 
         container = new ElasticsearchContainer();
-        container.withVersion(getVersionToTest());
+        container.withVersion(ELASTICSEARCH_DEFAULT_VERSION);
         container.withPlugin("discovery-gce");
         container.withEnv("ELASTIC_PASSWORD", "changeme");
 
@@ -149,11 +155,5 @@ public class ElasticsearchContainerTest {
         }
 
         return client;
-    }
-
-    private String getVersionToTest() throws IOException {
-        Properties props = new Properties();
-        props.load(ElasticsearchContainer.class.getResourceAsStream("elasticsearch-default.properties"));
-        return props.getProperty("version");
     }
 }

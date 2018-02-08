@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static fr.pilato.elasticsearch.containers.ElasticsearchContainer.ELASTICSEARCH_DEFAULT_BASE_URL;
+import static fr.pilato.elasticsearch.containers.ElasticsearchContainer.ELASTICSEARCH_DEFAULT_VERSION;
 
 /**
  * <p>Junit Test Resource for elasticsearch.</p>
@@ -41,7 +42,7 @@ import static fr.pilato.elasticsearch.containers.ElasticsearchContainer.ELASTICS
 public class ElasticsearchResource extends ExternalResource {
 
     private static final String DEFAULT_RESOURCE_NAME = "elasticsearch.properties";
-    private static final String FALLBACK_RESOURCE_NAME = "elasticsearch-default.properties";
+    static final String FALLBACK_RESOURCE_NAME = "elasticsearch-default.properties";
     private final String baseUrl;
     private final String version;
     private final Path pluginDir;
@@ -56,14 +57,14 @@ public class ElasticsearchResource extends ExternalResource {
     /**
      * Generate a resource programmatically
      * @param baseUrl   If null defaults to ELASTICSEARCH_DEFAULT_BASE_URL
-     * @param version   Elasticsearch version to start
+     * @param version   Elasticsearch version to start. If null defaults to ELASTICSEARCH_DEFAULT_VERSION
      * @param pluginDir Plugin dir which might contain plugins to install. Can be null.
      * @param plugins   Plugins to install. Can be null.
      * @param password  X-Pack default password. Can be null.
      */
     public ElasticsearchResource(String baseUrl, String version, Path pluginDir, List<String> plugins, String password) {
         this.baseUrl = baseUrl == null ? ELASTICSEARCH_DEFAULT_BASE_URL : baseUrl;
-        this.version = version;
+        this.version = version == null ? ELASTICSEARCH_DEFAULT_VERSION : version;
         this.pluginDir = pluginDir;
         this.plugins = plugins;
         this.password = password;

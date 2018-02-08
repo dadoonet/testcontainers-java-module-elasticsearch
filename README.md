@@ -5,7 +5,7 @@
 
 Testcontainers module for [elasticsearch](https://www.elastic.co/products/elasticsearch).
 
-Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/6.1/docker.html) provided by elastic.
+Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/docker.html) provided by elastic.
 
 See [testcontainers.org](https://www.testcontainers.org) for more information about Testcontainers.
 
@@ -14,9 +14,11 @@ See [testcontainers.org](https://www.testcontainers.org) for more information ab
 You can start an elasticsearch container instance from any Java application by using:
 
 ```java
-// Specify the version you need.
-ElasticsearchContainer container = new ElasticsearchContainer()
-        .withVersion("6.1.2");
+// Create the elasticsearch container.
+ElasticsearchContainer container = new ElasticsearchContainer();
+
+// Optional but highly recommended: Specify the version you need.
+container.withVersion("6.2.0");
 
 // Optional: you can also set what is the Docker registry you want to use with.
 container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
@@ -35,7 +37,7 @@ container.withEnv("ELASTIC_PASSWORD", "changeme");
 // Configure the container (mandatory).
 container.configure();
 
-// Start the container.
+// Start the container. This step might take some time...
 container.start();
 
 // Do whatever you want here.
@@ -78,7 +80,7 @@ the settings will be read from it:
 
 ```properties
 baseUrl=docker.elastic.co/elasticsearch/elasticsearch
-version=6.1.2
+version=6.2.0
 ```
 
 You can also define this programmatically with:
@@ -87,10 +89,15 @@ You can also define this programmatically with:
 @Rule
 public ElasticsearchResource elasticsearch = new ElasticsearchResource(
     "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
-    "6.1.2",                                         // version
+    "6.2.0",                                         // version (can be null)
     Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
     "changeme");                                     // X-Pack security password to set (can be null)
 ```
+
+## Running without x-pack
+
+If you prefer to start a Docker image without x-pack plugin, which means with no security or
+other advanced features, you can use this baseUrl instead: `docker.elastic.co/elasticsearch/elasticsearch-oss`.
 
 ## Dependency information
 
