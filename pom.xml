@@ -39,6 +39,16 @@
         <url>https://github.com/dadoonet/testcontainers-java-module-elasticsearch/issues/</url>
     </issueManagement>
 
+    <developers>
+        <developer>
+            <id>dadoonet</id>
+            <name>David Pilato</name>
+            <email>david@pilato.fr</email>
+            <url>http://david.pilato.fr/</url>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
     <dependencies>
         <dependency>
             <groupId>org.testcontainers</groupId>
