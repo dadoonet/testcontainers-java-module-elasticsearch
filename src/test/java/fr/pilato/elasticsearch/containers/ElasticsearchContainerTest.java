@@ -70,7 +70,7 @@ public class ElasticsearchContainerTest {
     @Test
     public void elasticsearchDefaultTest() throws IOException {
         container = new ElasticsearchContainer();
-        container.withVersion("6.1.2");
+        container.withVersion(getVersionToTest());
         container.withEnv("ELASTIC_PASSWORD", "changeme");
         container.configure();
         container.start();
@@ -81,7 +81,7 @@ public class ElasticsearchContainerTest {
     @Test
     public void elasticsearchFullTest() throws IOException {
         container = new ElasticsearchContainer();
-        container.withVersion("6.1.2");
+        container.withVersion(getVersionToTest());
         container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
 
         // We need to read where we exactly put the files
@@ -115,7 +115,7 @@ public class ElasticsearchContainerTest {
         // In which case, we should just ignore the test
 
         container = new ElasticsearchContainer();
-        container.withVersion("6.1.2");
+        container.withVersion(getVersionToTest());
         container.withPlugin("discovery-gce");
         container.withEnv("ELASTIC_PASSWORD", "changeme");
 
@@ -149,5 +149,11 @@ public class ElasticsearchContainerTest {
         }
 
         return client;
+    }
+
+    private String getVersionToTest() throws IOException {
+        Properties props = new Properties();
+        props.load(ElasticsearchContainer.class.getResourceAsStream("elasticsearch-default.properties"));
+        return props.getProperty("version");
     }
 }
