@@ -118,11 +118,39 @@ compile group: 'fr.pilato.elasticsearch.testcontainers', name: 'testcontainers-e
 ```
 
 
-## License
+# Release guide
+
+To release the project you need to run the release plugin with the `release` profile as you need to sign the artifacts:
+
+```sh
+mvn release:prepare
+git push --tags
+mvn release:perform -Prelease
+```
+
+If you need to skip the tests, run:
+
+```sh
+mvn release:perform -Prelease -Darguments="-DskipTests"
+```
+
+To announce the release, run:
+
+```sh
+cd target/checkout
+# Run the following command if you want to check the announcement email
+mvn changes:announcement-generate
+cat target/announcement/announcement.vm
+
+# Announce the release (change your smtp username and password)
+mvn changes:announcement-mail -Dchanges.username='YourSmtpUserName' -Dchanges.password='YourSmtpUserPassword'
+```
+
+# License
 
 See [LICENSE](LICENSE).
 
-## Copyright
+# Copyright
 
 Copyright (c) 2017, 2018 David Pilato.
 
