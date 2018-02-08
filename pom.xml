@@ -13,7 +13,7 @@
 
     <name>TestContainers :: elasticsearch</name>
     <description>Dockerized Elasticsearch container for testing under Testcontainers.</description>
-    <url>https://github.com/testcontainers/testcontainers-java-module-elasticsearch</url>
+    <url>https://github.com/dadoonet/testcontainers-java-module-elasticsearch</url>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
