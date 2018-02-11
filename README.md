@@ -85,13 +85,14 @@ version=6.2.1
 
 You can also define this programmatically with:
 
-```
+```java
 @Rule
 public ElasticsearchResource elasticsearch = new ElasticsearchResource(
-    "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
-    "6.2.1",                                         // version (can be null)
-    Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
-    "changeme");                                     // X-Pack security password to set (can be null)
+        "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
+        "6.2.1",                                         // version (can be null)
+        Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
+        Collections.singletonList("ingest-attachment"),  // standard plugins (can be null)
+        "changeme");                                     // X-Pack security password to set (can be null)
 ```
 
 ## Running without x-pack
