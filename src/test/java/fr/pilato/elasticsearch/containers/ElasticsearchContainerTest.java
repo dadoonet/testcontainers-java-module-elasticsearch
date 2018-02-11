@@ -66,7 +66,6 @@ public class ElasticsearchContainerTest {
     @Test
     public void elasticsearchNoVersionTest() throws IOException {
         container = new ElasticsearchContainer();
-        container.configure();
         container.withEnv("ELASTIC_PASSWORD", "changeme");
         container.start();
         Response response = getClient(container).performRequest("GET", "/");
@@ -78,7 +77,6 @@ public class ElasticsearchContainerTest {
         container = new ElasticsearchContainer();
         container.withVersion(ELASTICSEARCH_DEFAULT_VERSION);
         container.withEnv("ELASTIC_PASSWORD", "changeme");
-        container.configure();
         container.start();
         Response response = getClient(container).performRequest("GET", "/");
         assertThat(response.getStatusLine().getStatusCode(), is(200));
@@ -102,7 +100,6 @@ public class ElasticsearchContainerTest {
 
         container.withEnv("ELASTIC_PASSWORD", "changeme");
 
-        container.configure();
         container.start();
 
         Response response = getClient(container).performRequest("GET", "/");
@@ -124,8 +121,6 @@ public class ElasticsearchContainerTest {
         container.withVersion(ELASTICSEARCH_DEFAULT_VERSION);
         container.withPlugin("discovery-gce");
         container.withEnv("ELASTIC_PASSWORD", "changeme");
-
-        container.configure();
 
         try {
             container.start();

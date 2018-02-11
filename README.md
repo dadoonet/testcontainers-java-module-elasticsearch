@@ -34,9 +34,6 @@ container.withPluginDir(Paths.get("/path/to/zipped-plugins-dir"));
 // Optional: you can also change the password for X-Pack (for versions >= 6.1).
 container.withEnv("ELASTIC_PASSWORD", "changeme");
 
-// Configure the container (mandatory).
-container.configure();
-
 // Start the container. This step might take some time...
 container.start();
 
