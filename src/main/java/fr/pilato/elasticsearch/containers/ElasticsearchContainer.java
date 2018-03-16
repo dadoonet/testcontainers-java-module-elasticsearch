@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -60,6 +62,7 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
     private String version = ELASTICSEARCH_DEFAULT_VERSION;
     private Path pluginDir = null;
     private List<String> plugins = new ArrayList<>();
+    private Map<String, String> securedKeys = new HashMap<>();
 
     /**
      * Define the elasticsearch version to start
@@ -81,6 +84,16 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
         return this;
     }
 
+    /**
+     * Define the elasticsearch docker registry base url
+     * @param key Key
+     * @param value Value
+     * @return this
+     */
+    public ElasticsearchContainer withSecureSetting(String key, String value) {
+        securedKeys.put(key, value);
+        return this;
+    }
 
     /**
      * Plugin name to install. Note that will download the plugin from internet the first time you build the image
@@ -149,6 +162,14 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
                     for (String plugin : plugins) {
                         logger().debug("Installing plugin [{}]", plugin);
                         builder.run("bin/elasticsearch-plugin install " + plugin);
+                    }
+                    // If we have any secured key, we need to create the keystore
+                    if (!securedKeys.isEmpty()) {
+                        builder.run("bin/elasticsearch-keystore create");
+                    }
+                    for (Map.Entry<String, String> secrets : securedKeys.entrySet()) {
+                        logger().debug("Adding secured key [{}]", secrets.getKey());
+                        builder.run("echo '" + secrets.getValue() + "' | bin/elasticsearch-keystore add --stdin " + secrets.getKey());
                     }
                     String s = builder.build();
 
