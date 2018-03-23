@@ -37,13 +37,14 @@ import java.util.Set;
 import static fr.pilato.elasticsearch.containers.ElasticsearchResource.FALLBACK_RESOURCE_NAME;
 
 /**
- * Represents an elasticsearch docker instance which exposes by default port 9200.
+ * Represents an elasticsearch docker instance which exposes by default port 9200 and 9300 (transport.tcp.port)
  * The docker image is by default fetch from docker.elastic.co/elasticsearch/elasticsearch
  * @author dadoonet
  */
 public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> extends GenericContainer<SELF> {
 
     private static final int ELASTICSEARCH_DEFAULT_PORT = 9200;
+    private static final int ELASTICSEARCH_DEFAULT_TCP_PORT = 9300;
     static final String ELASTICSEARCH_DEFAULT_BASE_URL;
     static final String ELASTICSEARCH_DEFAULT_VERSION;
     static {
@@ -161,6 +162,7 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
 
         setImage(dockerImage);
         addExposedPort(ELASTICSEARCH_DEFAULT_PORT);
+        addExposedPort(ELASTICSEARCH_DEFAULT_TCP_PORT);
     }
 
     public HttpHost getHost() {
