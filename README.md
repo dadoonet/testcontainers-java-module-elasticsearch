@@ -34,6 +34,9 @@ container.withPluginDir(Paths.get("/path/to/zipped-plugins-dir"));
 // Optional: you can also change the password for X-Pack (for versions >= 6.1).
 container.withEnv("ELASTIC_PASSWORD", "changeme");
 
+// Optional: you can add secured settings in case you are using a plugin which requires it.
+container.withSecureSetting("foo", "bar");
+
 // Start the container. This step might take some time...
 container.start();
 
@@ -88,7 +91,8 @@ public ElasticsearchResource elasticsearch = new ElasticsearchResource(
         "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
         "6.2.1",                                         // version (can be null)
         Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
-        Collections.singletonList("ingest-attachment"),  // standard plugins (can be null)
+        Collections.singletonList("ingest-attachment"),  // standard plugins (can be empty)
+        Collections.singletonMap("foo", "bar"),          // Map of secured settings (can be empty)
         "changeme");                                     // X-Pack security password to set (can be null)
 ```
 
@@ -105,14 +109,14 @@ other advanced features, you can use this baseUrl instead: `docker.elastic.co/el
 <dependency>
     <groupId>fr.pilato.elasticsearch.testcontainers</groupId>
     <artifactId>testcontainers-elasticsearch</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-compile group: 'fr.pilato.elasticsearch.testcontainers', name: 'testcontainers-elasticsearch', version: '0.1-SNAPSHOT'
+compile group: 'fr.pilato.elasticsearch.testcontainers', name: 'testcontainers-elasticsearch', version: '0.1'
 ```
 
 

@@ -30,7 +30,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static fr.pilato.elasticsearch.containers.ElasticsearchContainer.ELASTICSEARCH_DEFAULT_BASE_URL;
@@ -48,6 +50,7 @@ public class ElasticsearchResource extends ExternalResource {
     private final Path pluginDir;
     private final String password;
     private final List<String> plugins;
+    private final Map<String, String> securedSettings;
     @Nullable private ElasticsearchContainer delegate;
 
     public ElasticsearchResource() {
@@ -56,17 +59,20 @@ public class ElasticsearchResource extends ExternalResource {
 
     /**
      * Generate a resource programmatically
-     * @param baseUrl   If null defaults to ELASTICSEARCH_DEFAULT_BASE_URL
-     * @param version   Elasticsearch version to start. If null defaults to ELASTICSEARCH_DEFAULT_VERSION
-     * @param pluginDir Plugin dir which might contain plugins to install. Can be null.
-     * @param plugins   Plugins to install. Can be null.
-     * @param password  X-Pack default password. Can be null.
+     * @param baseUrl           If null defaults to ELASTICSEARCH_DEFAULT_BASE_URL
+     * @param version           Elasticsearch version to start. If null defaults to ELASTICSEARCH_DEFAULT_VERSION
+     * @param pluginDir         Plugin dir which might contain plugins to install. Can be null.
+     * @param plugins           Plugins to install. Can be null.
+     * @param securedSettings   Map of secured settings (key/value). Can be null.
+     * @param password          X-Pack default password. Can be null.
      */
-    public ElasticsearchResource(String baseUrl, String version, Path pluginDir, List<String> plugins, String password) {
+    public ElasticsearchResource(String baseUrl, String version, Path pluginDir, List<String> plugins, Map<String, String> securedSettings,
+                                 String password) {
         this.baseUrl = baseUrl == null ? ELASTICSEARCH_DEFAULT_BASE_URL : baseUrl;
         this.version = version == null ? ELASTICSEARCH_DEFAULT_VERSION : version;
         this.pluginDir = pluginDir;
         this.plugins = plugins;
+        this.securedSettings = securedSettings;
         this.password = password;
     }
 
@@ -122,6 +128,7 @@ public class ElasticsearchResource extends ExternalResource {
         plugins = generateFromCommaSeparatedString(propPlugins);
         pluginDir = propPluginDir == null ? null : Paths.get(propPluginDir);
         password = propPassword;
+        securedSettings = Collections.emptyMap();
     }
 
     private List<String> generateFromCommaSeparatedString(String value) {
@@ -137,13 +144,19 @@ public class ElasticsearchResource extends ExternalResource {
     protected void before() {
         Preconditions.check("baseUrl can't be null", baseUrl != null);
         Preconditions.check("version can't be null", version != null);
+        Preconditions.check("plugins can't be null. Should be empty list instead", plugins != null);
+        Preconditions.check("securedSettings can't be null. Should be empty map instead", securedSettings != null);
         delegate = new ElasticsearchContainer()
                 .withBaseUrl(baseUrl)
                 .withVersion(version)
                 .withPluginDir(pluginDir);
 
         for (String plugin : plugins) {
-            delegate = delegate.withPlugin(plugin);
+            delegate.withPlugin(plugin);
+        }
+
+        for (Map.Entry<String, String> securedSetting : securedSettings.entrySet()) {
+            delegate.withSecureSetting(securedSetting.getKey(), securedSetting.getValue());
         }
 
         if (password != null && !password.isEmpty()) {
