@@ -31,7 +31,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ElasticsearchResourceWithPluginsDirTest extends ElasticsearchResourceBaseTest {
+public class ElasticsearchResourceWithPluginsDirAndVersionTest extends ElasticsearchResourceBaseTest {
     @ClassRule
     public static ElasticsearchResource elasticsearch = new ElasticsearchResource("elasticsearch-plugins-dir-version.properties");
 
