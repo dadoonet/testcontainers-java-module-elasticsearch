@@ -162,7 +162,7 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
                     }
                     for (String plugin : plugins) {
                         logger().debug("Installing plugin [{}]", plugin);
-                        builder.run("bin/elasticsearch-plugin install " + plugin);
+                        builder.run("bin/elasticsearch-plugin install " + plugin + " --batch");
                     }
                     // If we have any secured key, we need to create the keystore
                     if (!securedKeys.isEmpty()) {
