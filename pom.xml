@@ -238,7 +238,7 @@
                         <executions>
                             <execution>
                                 <id>download-ingest-attachment</id>
-                                <phase>generate-test-resources</phase>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>download-single</goal>
                                 </goals>
@@ -257,7 +257,7 @@
                         <executions>
                             <execution>
                                 <id>fake-elasticsearch-repository</id>
-                                <phase>generate-test-resources</phase>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>install-file</goal>
                                 </goals>
@@ -293,7 +293,7 @@
                         <executions>
                             <execution>
                                 <id>download-ingest-attachment-old</id>
-                                <phase>generate-test-resources</phase>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>download-single</goal>
                                 </goals>
@@ -312,7 +312,7 @@
                         <executions>
                             <execution>
                                 <id>fake-elasticsearch-repository-old</id>
-                                <phase>generate-test-resources</phase>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>install-file</goal>
                                 </goals>
