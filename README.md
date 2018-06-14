@@ -5,7 +5,7 @@
 
 Testcontainers module for [elasticsearch](https://www.elastic.co/products/elasticsearch).
 
-Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/docker.html) provided by elastic.
+Note that it's based on the [official Docker image](https://www.elastic.co/guide/en/elasticsearch/reference/6.3/docker.html) provided by elastic.
 
 See [testcontainers.org](https://www.testcontainers.org) for more information about Testcontainers.
 
@@ -18,7 +18,7 @@ You can start an elasticsearch container instance from any Java application by u
 ElasticsearchContainer container = new ElasticsearchContainer();
 
 // Optional but highly recommended: Specify the version you need.
-container.withVersion("6.2.1");
+container.withVersion("6.3.0");
 
 // Optional: you can also set what is the Docker registry you want to use with.
 container.withBaseUrl("docker.elastic.co/elasticsearch/elasticsearch");
@@ -80,7 +80,7 @@ the settings will be read from it:
 
 ```properties
 baseUrl=docker.elastic.co/elasticsearch/elasticsearch
-version=6.2.1
+version=6.3.0
 ```
 
 You can also define this programmatically with:
@@ -89,14 +89,14 @@ You can also define this programmatically with:
 @Rule
 public ElasticsearchResource elasticsearch = new ElasticsearchResource(
         "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
-        "6.2.1",                                         // version (can be null)
+        "6.3.0",                                         // version (can be null)
         Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
         Collections.singletonList("ingest-attachment"),  // standard plugins (can be empty)
         Collections.singletonMap("foo", "bar"),          // Map of secured settings (can be empty)
         "changeme");                                     // X-Pack security password to set (can be null)
 ```
 
-Note that if you are still using the [TransportClient](https://www.elastic.co/guide/en/elasticsearch/client/java-api/6.2/transport-client.html)
+Note that if you are still using the [TransportClient](https://www.elastic.co/guide/en/elasticsearch/client/java-api/6.3/transport-client.html)
 (not recommended as deprecated), the default cluster name is set to `docker-cluster` so you need to change `cluster.name` setting
 or set `client.transport.ignore_cluster_name` to `true`.
 
