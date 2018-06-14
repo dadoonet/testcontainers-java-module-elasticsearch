@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -145,9 +146,7 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
     @NotNull
     @Override
     protected Set<Integer> getLivenessCheckPorts() {
-        Set<Integer> ports = new HashSet<>(super.getLivenessCheckPorts());
-        ports.add(getMappedPort(ELASTICSEARCH_DEFAULT_PORT));
-        return ports;
+        return ImmutableSet.of(getMappedPort(ELASTICSEARCH_DEFAULT_PORT));
     }
 
     @Override
