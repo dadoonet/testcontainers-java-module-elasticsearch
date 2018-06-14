@@ -96,6 +96,10 @@ public ElasticsearchResource elasticsearch = new ElasticsearchResource(
         "changeme");                                     // X-Pack security password to set (can be null)
 ```
 
+Note that if you are still using the [TransportClient](https://www.elastic.co/guide/en/elasticsearch/client/java-api/6.2/transport-client.html)
+(not recommended as deprecated), the default cluster name is set to `docker-cluster` so you need to change `cluster.name` setting
+or set `client.transport.ignore_cluster_name` to `true`.
+
 ## Running without x-pack
 
 If you prefer to start a Docker image without x-pack plugin, which means with no security or
