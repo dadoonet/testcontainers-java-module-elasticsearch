@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-parent</artifactId>
-        <version>1.6.0</version>
-    </parent>
 
     <groupId>fr.pilato.elasticsearch.testcontainers</groupId>
     <artifactId>testcontainers-elasticsearch</artifactId>
@@ -23,6 +18,7 @@
     </licenses>
 
     <properties>
+        <testcontainer.version>1.6.0</testcontainer.version>
         <!-- WARN: anytime you change the version, change profiles copy-plugin and fake-elastic-maven-repository -->
         <elasticsearch.version>6.3.0</elasticsearch.version>
         <!-- WARN: anytime you change the version, change profiles copy-old-plugin and fake-elastic-maven-repository-for-old-plugin -->
@@ -32,6 +28,9 @@
         <plugin.dir>${project.build.directory}/plugins</plugin.dir>
         <xpack.password>changeme</xpack.password>
         <skipTests>false</skipTests>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <issueManagement>
@@ -53,12 +52,19 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${testcontainer.version}</version>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-client</artifactId>
             <version>${elasticsearch.client.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
