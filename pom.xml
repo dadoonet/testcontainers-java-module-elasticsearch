@@ -18,7 +18,7 @@
     </licenses>
 
     <properties>
-        <testcontainer.version>1.6.0</testcontainer.version>
+        <testcontainer.version>1.7.0</testcontainer.version>
         <!-- WARN: anytime you change the version, change profiles copy-plugin and fake-elastic-maven-repository -->
         <elasticsearch.version>6.3.0</elasticsearch.version>
         <!-- WARN: anytime you change the version, change profiles copy-old-plugin and fake-elastic-maven-repository-for-old-plugin -->

@@ -35,7 +35,7 @@ public class ElasticsearchResourceContructorTest {
     // We don't annotate it as a Rule as we just want to have it here for documentation
     public ElasticsearchResource elasticsearch = new ElasticsearchResource(
             "docker.elastic.co/elasticsearch/elasticsearch", // baseUrl (can be null)
-            "6.2.1",                                         // version (can be null)
+            "6.3.0",                                         // version (can be null)
             Paths.get("/path/to/zipped-plugins-dir"),        // pluginsDir (can be null)
             Collections.singletonList("ingest-attachment"),  // standard plugins (can be empty)
             Collections.singletonMap("foo", "bar"),          // Map of secured settings (can be empty)
