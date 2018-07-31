@@ -44,6 +44,7 @@ public class ElasticsearchResourceWithPluginsDirAndVersionTest extends Elasticse
     public void testPluginsAreInstalled() {
         String list = executeCommandInDocker("bin/elasticsearch-plugin", "list");
         assertThat(list, containsString("ingest-attachment"));
+        assertThat(list, containsString("discovery-gce"));
     }
 
     @Test
@@ -52,6 +53,7 @@ public class ElasticsearchResourceWithPluginsDirAndVersionTest extends Elasticse
         assertThat(response.getStatusLine().getStatusCode(), is(200));
         String responseAsString = EntityUtils.toString(response.getEntity());
         assertThat(responseAsString, containsString("ingest-attachment"));
+        assertThat(responseAsString, containsString("discovery-gce"));
     }
 
     private String executeCommandInDocker(String... params) {
