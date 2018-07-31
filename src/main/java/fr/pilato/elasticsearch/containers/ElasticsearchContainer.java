@@ -20,7 +20,6 @@
 package fr.pilato.elasticsearch.containers;
 
 import org.apache.http.HttpHost;
-import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -31,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -143,9 +141,8 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
         return this;
     }
 
-    @NotNull
     @Override
-    protected Set<Integer> getLivenessCheckPorts() {
+    public Set<Integer> getLivenessCheckPortNumbers() {
         return ImmutableSet.of(getMappedPort(ELASTICSEARCH_DEFAULT_PORT));
     }
 
