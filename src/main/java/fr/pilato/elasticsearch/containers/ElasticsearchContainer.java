@@ -185,4 +185,8 @@ public class ElasticsearchContainer<SELF extends ElasticsearchContainer<SELF>> e
     public HttpHost getHost() {
         return new HttpHost(getContainerIpAddress(), getMappedPort(ELASTICSEARCH_DEFAULT_PORT));
     }
+
+    public TcpHost getTcpHost() {
+        return new TcpHost(getContainerIpAddress(), getMappedPort(ELASTICSEARCH_DEFAULT_TCP_PORT));
+    }
 }

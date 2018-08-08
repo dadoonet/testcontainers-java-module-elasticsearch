@@ -181,6 +181,15 @@ public class ElasticsearchResource extends ExternalResource {
         return delegate.getHost();
     }
 
+    /**
+     * Get the TcpHost instance you can use to build an elasticsearch Transport client
+     * @return a TcpHost
+     */
+    public TcpHost getTcpHost() {
+        Preconditions.check("delegate must have been created by before()", delegate != null);
+        return delegate.getTcpHost();
+    }
+
     @Nullable
     public ElasticsearchContainer getContainer() {
         return delegate;
