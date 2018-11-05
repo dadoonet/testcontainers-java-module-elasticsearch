@@ -1,3 +1,7 @@
+**IMPORTANT**: This project has moved under testcontainers project as an [elasticsearch module](https://github.com/testcontainers/testcontainers-java/tree/master/modules/elasticsearch).
+
+No more released will be done in this repository.
+
 # TestContainers elasticsearch testing module
 
 [![Build Status](https://travis-ci.org/dadoonet/testcontainers-java-module-elasticsearch.svg?branch=master)](https://travis-ci.org/dadoonet/testcontainers-java-module-elasticsearch)
